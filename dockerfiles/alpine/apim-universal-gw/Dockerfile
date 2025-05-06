@@ -91,16 +91,24 @@ RUN \
     && echo ${MOTD} > "${ENV}"
 
 # copy init script to user home
-COPY --chown=wso2carbon:wso2 docker-entrypoint.sh ${USER_HOME}/
-    
+COPY docker-entrypoint.sh ${USER_HOME}
+
+RUN chown ${USER} /home/${USER}/docker-entrypoint.sh \
+    && chgrp -R 0 ${USER_HOME} \
+    && chmod -R g=u ${USER_HOME}
+   
 # add the WSO2 product distribution to user's home directory
 RUN \
     wget -O ${WSO2_SERVER}.zip "${WSO2_SERVER_DIST_URL}" \
     && unzip -d ${USER_HOME} ${WSO2_SERVER}.zip \
     && chown wso2carbon:wso2 -R ${WSO2_SERVER_HOME} \
+    && chgrp -R 0 ${WSO2_SERVER_HOME} \
+    && chmod -R g=u ${WSO2_SERVER_HOME} \
     && mkdir ${USER_HOME}/wso2-tmp \
     && bash -c 'mkdir -p ${USER_HOME}/solr/{indexed-data,database}' \
     && chown wso2carbon:wso2 -R ${USER_HOME}/solr \
+    && chgrp -R 0 ${USER_HOME}/solr \
+    && chmod -R g=u ${USER_HOME}/solr \
     && cp -r ${WSO2_SERVER_HOME}/repository/deployment/server/synapse-configs ${USER_HOME}/wso2-tmp \
     && rm -f ${WSO2_SERVER}.zip
 
